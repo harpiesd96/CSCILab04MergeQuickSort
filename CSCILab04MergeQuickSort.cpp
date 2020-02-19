@@ -1,7 +1,6 @@
 #include <iostream>
 #include <random>
 #include <chrono>
-#include <math.h>
 
 static constexpr size_t ARRAY_SIZE = 128;
 
@@ -25,15 +24,84 @@ void PrintArray(int* array)
 }
 
 //merge sort
-void MergeSort(int* array)
+void Merge(int* array, int low, int high, int mid);
+void MergeSort(int* array, int low, int high)
 {
-
+    int mid;
+    if (low < high)
+    {
+        //divide the array at mid and sort independently using merge sort
+        mid = (low + high) / 2;
+        MergeSort(array, low, mid);
+        MergeSort(array, mid + 1, high);
+        //merge or conquer sorted arrays
+        Merge(array, low, high, mid);
+    }
+}
+void Merge(int* array, int low, int high, int mid)
+{
+    int i, j, k, c[ARRAY_SIZE];
+    i = low;
+    k = low;
+    j = mid + 1;
+    while (i <= mid && j <= high) {
+        if (array[i] < array[j]) {
+            c[k] = array[i];
+            k++;
+            i++;
+        }
+        else {
+            c[k] = array[j];
+            k++;
+            j++;
+        }
+    }
+    while (i <= mid) {
+        c[k] = array[i];
+        k++;
+        i++;
+    }
+    while (j <= high) {
+        c[k] = array[j];
+        k++;
+        j++;
+    }
+    for (i = low; i < k; i++) {
+        array[i] = c[i];
+    }
 }
 
-//quick sort
-void QuickSort(int* array)
-{
 
+//quick sort
+int partition(int* array, int low, int high)
+{
+    int pivot = array[high];    // pivot 
+    int i = (low - 1);
+
+    for (int j = low; j <= high - 1; j++)
+    {
+        //if current element is smaller than pivot, increment the low element
+        //swap elements at i and j
+        if (array[j] <= pivot)
+        {
+            i++;    // increment index of smaller element 
+            swap(array[i], array[j]);
+        }
+    }
+    swap(array[i + 1], array[high]);
+    return (i + 1);
+}
+void QuickSort(int* array, int low, int high)
+{
+    if (low < high)
+    {
+        //partition the array 
+        int pivot = partition(array, low, high);
+
+        //sort the sub arrays independently 
+        QuickSort(array, low, pivot - 1);
+        QuickSort(array, pivot + 1, high);
+    }
 }
 
 
@@ -59,12 +127,12 @@ int main()
 
 
         //show container
-        std::cout << "bubble sort:" << std::endl;
+        std::cout << "merge sort:" << std::endl;
         PrintArray(container0);
         //record start time
         auto start = std::chrono::high_resolution_clock::now();
-        //insertion sort array
-        //BubbleSort(container0);
+        //merge sort array
+        MergeSort(container0, 0, ARRAY_SIZE-1);
         //record end time
         auto end = std::chrono::high_resolution_clock::now();
         std::chrono::duration<long double> delta_time = end - start;
@@ -72,14 +140,14 @@ int main()
         PrintArray(container0);
         std::cout << "sort time: " << delta_time.count() << "s\n" << std::endl;
 
-
+        
         //show container
-        std::cout << "selection sort:" << std::endl;
+        std::cout << "quick sort:" << std::endl;
         PrintArray(container1);
         //record start time
         start = std::chrono::high_resolution_clock::now();
         //selection sort array
-        //SelectionSort(container1);
+        QuickSort(container1, 0, ARRAY_SIZE-1);
         //record end time
         end = std::chrono::high_resolution_clock::now();
         delta_time = end - start;
